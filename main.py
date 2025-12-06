@@ -15,9 +15,11 @@ class JWTRequest(BaseModel):
 
 
 def require_api_key(x_api_key: str | None = Header(default=None)):
-    """Check API key if SERVICE_API_KEY is configured."""
+    """Check API key against SERVICE_API_KEY."""
     expected = os.getenv("SERVICE_API_KEY")
-    if expected and (not x_api_key or x_api_key != expected):
+    if not expected:
+        raise HTTPException(status_code=500, detail="SERVICE_API_KEY not configured on server")
+    if not x_api_key or x_api_key != expected:
         raise HTTPException(status_code=401, detail="Unauthorized: invalid or missing x-api-key")
 
 
