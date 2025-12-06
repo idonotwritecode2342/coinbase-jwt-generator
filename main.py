@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from coinbase import jwt_generator
 from dotenv import load_dotenv
@@ -14,8 +14,17 @@ class JWTRequest(BaseModel):
     uri: str
 
 
+def require_api_key(x_api_key: str | None = Header(default=None)):
+    """Check API key if SERVICE_API_KEY is configured."""
+    expected = os.getenv("SERVICE_API_KEY")
+    if expected and (not x_api_key or x_api_key != expected):
+        raise HTTPException(status_code=401, detail="Unauthorized: invalid or missing x-api-key")
+
+
 @app.post("/generate-jwt")
-async def generate_jwt(request: JWTRequest) -> dict:
+async def generate_jwt(request: JWTRequest, x_api_key: str | None = Header(default=None)) -> dict:
+    # Enforce simple API key auth via header
+    require_api_key(x_api_key)
     """Generate a Coinbase JWT token for the given method and URI."""
     try:
         api_key = os.getenv("COINBASE_API_KEY")
