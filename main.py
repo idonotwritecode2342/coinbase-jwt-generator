@@ -6,13 +6,24 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="AI Trading Helpers API")
+app = FastAPI(
+    title="AI Trading Helpers API",
+    description="A collection of helper APIs for AI trading workflows.",
+    version="1.0.0",
+)
 
+# -----------------------------------------------------------------------------
+# Data Models
+# -----------------------------------------------------------------------------
 
 class JWTRequest(BaseModel):
     method: str
     uri: str
 
+
+# -----------------------------------------------------------------------------
+# Auth & Helpers
+# -----------------------------------------------------------------------------
 
 def require_api_key(x_api_key: str | None = Header(default=None)):
     """Check API key against SERVICE_API_KEY."""
@@ -23,7 +34,16 @@ def require_api_key(x_api_key: str | None = Header(default=None)):
         raise HTTPException(status_code=401, detail="Unauthorized: invalid or missing x-api-key")
 
 
-@app.post("/generate-jwt")
+# -----------------------------------------------------------------------------
+# API Endpoints
+# -----------------------------------------------------------------------------
+
+@app.post(
+    "/generate-jwt",
+    tags=["Coinbase"],
+    summary="Generate Coinbase JWT",
+    description="Generates a JWT token for authenticating with Coinbase Advanced Trade API.",
+)
 async def generate_jwt(request: JWTRequest, x_api_key: str | None = Header(default=None)) -> dict:
     # Enforce simple API key auth via header
     require_api_key(x_api_key)
@@ -55,7 +75,7 @@ async def generate_jwt(request: JWTRequest, x_api_key: str | None = Header(defau
         )
 
 
-@app.get("/")
+@app.get("/", tags=["Health"], summary="Health Check")
 async def root() -> dict:
     """Health check endpoint."""
     return {"message": "AI Trading Helpers API is running"}
