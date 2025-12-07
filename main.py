@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="Coinbase JWT Generator")
+app = FastAPI(title="AI Trading Helpers API")
 
 
 class JWTRequest(BaseModel):
@@ -58,4 +58,4 @@ async def generate_jwt(request: JWTRequest, x_api_key: str | None = Header(defau
 @app.get("/")
 async def root() -> dict:
     """Health check endpoint."""
-    return {"message": "Coinbase JWT Generator API is running"}
+    return {"message": "AI Trading Helpers API is running"}
